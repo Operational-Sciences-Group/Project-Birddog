@@ -1,6 +1,6 @@
 'birddog' (at current version 0.7) is a powershell function for parsing a .csv or .json file for a search term and 
 identifying the lines where that term occurs.  The intended use-case is for identifying the location of a string for manual
-manipulation where automatically replacing every occurance of the string within the file with powershell is 
+manipulation where automatically replacing every occurrence of the string within the file with powershell is 
 unwanted.
 Once 'birddogv0.7.ps1' is run within a powershell session, the function can be invoked in one of two ways;  By
 feeding the 'filepath' and 'searchterm' parameters on the same line:
@@ -15,7 +15,7 @@ Supply values for the following parameters:
 filepath: C:\example.csv
 searchterm: UserImLookingFor
 
-Note: Birddog can be piped into Format-Table to clean up results if necissary:
+Note: Birddog can be piped into Format-Table to clean up results if necessary:
 
 PS C:\> birddog -filepath C:\example.csv -searchterm UserImLookingFor | Format-Table -Autosize
 
