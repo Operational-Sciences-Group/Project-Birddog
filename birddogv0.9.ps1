@@ -1,4 +1,4 @@
-﻿#check for importexcel module, if it's not installed it will be to facilitate .xls &.xlsx interactivity:
+﻿#check for importexcel module, if it's not installed it will be to facilitate .xlsx interactivity:
 if (-not (Get-Module -Name importexecel)) {
     install-module importexcel
 }
