@@ -1,4 +1,4 @@
-'birddog' (at current version 1) is a PowerShell function for parsing a .csv, .json, or .xlsx files for a search term and 
+'birddog' (at current version 1) is a PowerShell function for parsing a .csv, .json, or .xlsx file for a search term and 
 identifying the lines where that term occurs.  The intended use-case is for identifying the location of a string for manual
 manipulation where automatically replacing every occurrence of the string within the file with powershell is 
 unwanted.\
