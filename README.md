@@ -3,7 +3,7 @@ identifying the lines where that term occurs.  The intended use-case is for iden
 manipulation where automatically replacing every occurrence of the string within the file with PowerShell is 
 unwanted.\
 \
-Please note: birddogv1.ps1 checks for the installation of the 'importexcel' module to facilitate .xlsx functionality.  If the importexcel module is not installed, it will attempt to install the module.  This will fail in a standard powershell session, as PowerShell module installations require powershell session to be run as administrator.\
+Please note: birddogv1.ps1 checks for the installation of the 'importexcel' module to facilitate .xlsx functionality.  If the importexcel module is not installed, it will attempt to install the module.  This will fail in a standard PowerShell session, as PowerShell module installations require the PowerShell session to be run as administrator.\
 \
 Once 'birddogv1.ps1' is run within a PowerShell session, the function can be invoked in one of two ways;  By
 feeding the 'filepath' and 'searchterm' parameters on the same line:\
