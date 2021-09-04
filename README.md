@@ -1,8 +1,10 @@
 'birddog' (at current version 1) is a PowerShell function for parsing a .csv, .json, or .xlsx file for a search term and 
 identifying the lines where that term occurs.  The intended use-case is for identifying the location of a string for manual
-manipulation where automatically replacing every occurrence of the string within the file with powershell is 
+manipulation where automatically replacing every occurrence of the string within the file with PowerShell is 
 unwanted.\
-Please note: birddogv1.ps1 checks for the installation of the 'importexcel' module to facilitate .xlsx functionality.  If the importexcel module is not installed, it will attempt to install the module.  This will fail in a standard powershell session, as module installations require powershell session to be run as administrator.\
+\
+Please note: birddogv1.ps1 checks for the installation of the 'importexcel' module to facilitate .xlsx functionality.  If the importexcel module is not installed, it will attempt to install the module.  This will fail in a standard powershell session, as PowerShell module installations require powershell session to be run as administrator.\
+\
 Once 'birddogv1.ps1' is run within a PowerShell session, the function can be invoked in one of two ways;  By
 feeding the 'filepath' and 'searchterm' parameters on the same line:\
 \
