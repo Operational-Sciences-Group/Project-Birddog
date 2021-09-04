@@ -22,5 +22,5 @@ Note: Birddog can be piped into Format-Table to clean up results if necessary:\
 \
 PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize\
 \
-As of v1 .csv, .json, and .xlsx files are supported.  .xlsx files will display the searchterm location as 'row' (reflecting the typical spreadsheet term) instead of 'linnumber' used in .csv and .json.\
+As of v1 .csv, .json, and .xlsx files are supported.  .xlsx files will display the searchterm location as 'row' (reflecting the typical spreadsheet term) instead of 'linenumber' used in .csv and .json results.\
 Thank you for reading!
