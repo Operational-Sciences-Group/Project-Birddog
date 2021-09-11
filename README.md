@@ -8,20 +8,20 @@ Please note: birddogv1.ps1 checks for the installation of the 'importexcel' modu
 Once 'birddogv1.1.ps1' is run within a PowerShell session, the function can be invoked in one of two ways;  By
 feeding the 'filepath' and 'searchterm' parameters on the same line:\
 \
-''' PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor ''' \
+'''PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor''' \
 \
 Or via invoking the function, and giving the 'filepath' and 'searchterm' parameters as prompted:\
 \
-''' PS C:\> birddog ''' \
-''' cmdlet birddog at command pipeline position 1 ''' \
-''' Supply values for the following parameters: ''' \
-''' filepath: C:\example.csv ''' \
-''' searchterm: ThingImLookingFor ''' \
+'''PS C:\> birddog''' \
+'''cmdlet birddog at command pipeline position 1''' \
+'''Supply values for the following parameters:''' \
+'''filepath: C:\example.csv''' \
+'''searchterm: ThingImLookingFor''' \
 \
-As of version 1.1, Birddog can be instructed to ignore csv headers (and include the header line in the 'Line Number' count) with the ''' -nocsvheader ''' switch.
+As of version 1.1, Birddog can be instructed to ignore csv headers (and include the header line in the 'Line Number' count) with the '''-nocsvheader''' switch.
 Note: Birddog can be piped into Format-Table to clean up results if necessary:\
 \
-''' PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize ''' \
+'''PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize''' \
 \
 As of version 1.1 .csv, .json, and .xlsx files are supported.  .xlsx files will display the searchterm location as 'row' (reflecting the typical spreadsheet term) instead of 'Line Number' used in .csv and .json results.\
 Thank you for reading!
