@@ -18,8 +18,8 @@ Or via invoking the function, and giving the 'filepath' and 'searchterm' paramet
 ``` filepath: C:\example.csv ``` \
 ``` searchterm: ThingImLookingFor ``` \
 \
-As of version 1.1, Birddog can be instructed to ignore csv headers (and include the header line in the 'Line Number' count) with the ```-nocsvheader``` switch.
-Note: Birddog can be piped into Format-Table to clean up results if necessary:\
+As of version 1.1, Birddog can be instructed to ignore csv headers (and include the header line in the 'Line Number' count) with the ```-nocsvheader``` switch.\
+Note: Birddog can also be piped into Format-Table to clean up results if necessary:\
 \
 ``` PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize ``` \
 \
