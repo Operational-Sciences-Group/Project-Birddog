@@ -34,7 +34,8 @@ SYNOPSIS
         
 SYNTAX
     birddog -path <relative\or\absolute\path\to\file.txt> -searchterm <yoursearchterm> -recurse
-    birddog -p <relative\or\absolute\path\to\file.txt> -s <yoursearchterm> -recurse
+    birddog -p <relative\or\absolute\path\to\file.txt> -s <yoursearchterm> -recurse"
+    
     # if -help
     if ($help){
         Write-Host $helptext | Format-Table -AutoSize 
