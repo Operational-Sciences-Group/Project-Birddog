@@ -20,7 +20,7 @@ Or via invoking the function, and giving the 'path' and 'searchterm' parameters 
 \
 Note: Birddog can also be piped into Format-Table to clean up results if necessary:\
 \
-``` PS C:\> birddog -filepath C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize ``` \
+``` PS C:\> birddog -path C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize ``` \
 \
 With version 1.2, parameter aliases ``` -p ``` and ``` -s ``` can be used in place of ``` -path ``` and ``` -searchterm ``` respectivley.  A help page can be viewed on the command line with:\
 ``` birddog -help ``` or ``` birddog -h ```\
