@@ -2,19 +2,28 @@
 function birddog {
     [CmdletBinding()]
     param (
+
+        # filepath parameter
         [Alias("p")]
         [Parameter(
         HelpMessage="Enter a relative or absolute path to files.")]
-        [string]$path,
+        [string]$Path,
 
+        # searchterm parameter
         [Alias("s")]
         [Parameter(
         HelpMessage="Enter the string you are searching for. (Regex compatible)")]
-        [string]$searchterm,
+        [string]$Searchterm,
 
+        # print help message switch
         [Alias("h")]
         [Parameter(HelpMessage="Use `"-h`" to display the help message")]
-        [switch]$help
+        [switch]$Help,
+
+        # Recursive search switch 
+        [Parameter(HelpMessage="Recurse searches all sub directories / files within the path specified in the -path parameter.
+        Does not support .xlsx files")]
+        [switch]$Recurse
     )
     $helptext ="`nNAME
     birddog
@@ -30,10 +39,10 @@ SYNTAX
     birddog -p <relative\or\absolute\path\to\file.txt> -s <yoursearchterm>
 
 REMARKS
-    Please note: birddog checks for the installation of the 'importexcel' module to facilitate .xlsx functionality when a .xlsx file is provided. 
+    Please note: birddogv1.ps1 checks for the installation of the 'importexcel' module to facilitate .xlsx functionality when a .xlsx file is provided. 
     If the importexcel module is not installed, it will attempt to install the module. This will fail in a standard PowerShell session, 
     as PowerShell module installations require the PowerShell session to be run as administrator. 
-    This check and/or install will not occur when non-.xlsx files are provided.`n"
+    This check and/or install will not occur when .csv or .json files are provided.`n"
 
     # if -help
     if ($help){
@@ -54,7 +63,7 @@ REMARKS
             if ($extn -eq ".xlsx") {
                 #check for importexcel module, if it's not installed it will be (to facilitate .xlsx interactivity)
                 if (-not (Get-Module -Name importexecel)) {
-                    install-module importexcel
+                    install-module importexcel -scope CurrentUser
                 }
                 $search = Import-Excel -Path $path -noheader | Select-String -Pattern $searchterm
                 $output =[ordered]@{
@@ -67,8 +76,15 @@ REMARKS
 
             # else all other text encoded files
             } else {
-                $search = Get-Content -Path $path -ErrorAction Stop | Select-String -Pattern $searchterm
-                $output =[ordered]@{
+                #Recursive search
+                if ($Recurse){
+                    Write-Host "`nfile:linenumber:line contents`n"
+                    Get-ChildItem -Recurse -Path $path -ErrorAction Stop | Select-String -Pattern $searchterm
+                }
+                # No recursion
+                else {
+                    $search = Get-ChildItem -Path $path -ErrorAction Stop | Select-String -Pattern $searchterm
+                    $output =[ordered]@{
                     'SearchTerm' = $null
                     'LineNumber' = $null
                 }
@@ -78,6 +94,8 @@ REMARKS
                     Write-Host "`nNo results found"
                 }
                 [pscustomobject]$output
+                Write-Host $output | Format-Table -AutoSize
+                }
             }
         }
         # catch no parameter execution
@@ -88,15 +106,6 @@ REMARKS
         catch [System.Management.Automation.ItemNotFoundException]{
             Write-Host "`nFile not found."
             Write-host "Check path parameter and try again"
-        }
-        # Catch insufficient permissions
-        catch [System.UnauthorizedAccessException]{
-            Write-Host "`n The importexcel module is not installed and the current process has insufficient permissions to install it."
-            Write-Host "Try running this command again with administrator privileges`n"
-        }
-        catch [System.Security.SecurityException]{
-            Write-Host "`n The importexcel module is not installed and the current process has insufficient permissions to install it."
-            Write-Host "Try running this command again with administrator privileges`n"
         }
     }
 }
