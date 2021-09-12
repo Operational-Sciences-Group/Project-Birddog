@@ -30,10 +30,10 @@ SYNTAX
     birddog -p <relative\or\absolute\path\to\file.txt> -s <yoursearchterm>
 
 REMARKS
-    Please note: birddogv1.ps1 checks for the installation of the 'importexcel' module to facilitate .xlsx functionality when a .xlsx file is provided. 
+    Please note: birddog checks for the installation of the 'importexcel' module to facilitate .xlsx functionality when a .xlsx file is provided. 
     If the importexcel module is not installed, it will attempt to install the module. This will fail in a standard PowerShell session, 
     as PowerShell module installations require the PowerShell session to be run as administrator. 
-    This check and/or install will not occur when .csv or .json files are provided.`n"
+    This check and/or install will not occur when non-.xlsx files are provided.`n"
 
     # if -help
     if ($help){
