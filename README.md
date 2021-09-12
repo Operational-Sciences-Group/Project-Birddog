@@ -18,11 +18,16 @@ Or via invoking the function, and giving the 'path' and 'searchterm' parameters 
 ``` path: C:\example.csv ``` \
 ``` searchterm: ThingImLookingFor ``` \
 \
+Note: Birddog can locate sentences with spaces when double quotations are used around the value provided for the searchterm parameter:\
+\
+``` PS C:\> birddog -path C:\example.csv -searchterm "Thing I'm Looking For" ```\
+\
 Note: Birddog can also be piped into Format-Table to clean up results if necessary:\
 \
 ``` PS C:\> birddog -path C:\example.csv -searchterm ThingImLookingFor | Format-Table -Autosize ``` \
 \
 With version 1.2, parameter aliases ``` -p ``` and ``` -s ``` can be used in place of ``` -path ``` and ``` -searchterm ``` respectivley.  A help page can be viewed on the command line with:\
 ``` birddog -help ``` or ``` birddog -h ```\
+\
 As of version 1.2 structured text and .xlsx files are supported.  .xlsx files will display the searchterm location as 'Row' (reflecting the typical spreadsheet term) instead of 'LineNumber' used in all other structured text results.\
 Thank you for reading!
