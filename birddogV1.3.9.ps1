@@ -133,14 +133,14 @@ SYNTAX
                     $output =[ordered]@{
                     'SearchTerm' = $null
                     'LineNumber' = $null
-                }
-                $output.SearchTerm = $searchterm
-                $output.LineNumber = $search.LineNumber
-                if(!($search.LineNumber)){
-                    Write-Host "`nNo results found"
-                }
-                [pscustomobject]$output
-                Write-Host $output | Format-Table -AutoSize
+                    }
+                    $output.SearchTerm = $searchterm
+                    $output.LineNumber = $search.LineNumber
+                    if(!($search.LineNumber)){
+                        Write-Host "`nNo results found"
+                    }
+                    [pscustomobject]$output
+                    Write-Host $output | Format-Table -AutoSize
                 }
             }
         }
