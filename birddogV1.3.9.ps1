@@ -33,8 +33,7 @@ function birddog {
 
 
         # Regex string parameter
-        [Parameter(HelpMessage="Recurse searches all sub directories / files within the path specified in the -path parameter.
-        Does not support .xlsx files")]
+        [Parameter(HelpMessage="Regular Expressions valid options include: IPv4")]
         [ValidateSet("IPv4","IPv4")]
         [string]$Regex
     )
