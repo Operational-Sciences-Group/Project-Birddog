@@ -257,7 +257,6 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
                 elseif(($Replace) -and (!($Recurse)) -and ($Searchterm) ){
                     $Search = $Pipe1 + $Pipe2
                     $Search | Invoke-Expression
-                    Write-Host $Search
                     # If LineNumber not null (results found)
                     if($Search | Invoke-Expression | Select-Object LineNumber){
                         Write-Host $format
@@ -267,7 +266,7 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
                         Write-Host "Successfully replaced `"$Searchterm`" with `"$Replace`" in $path"
                     }
                     else{
-                        Write-Host "`nNo Results Found loser`n"
+                        Write-Host "`nNo Results Found`n"
                     }
                 }
                 # Execute plain regex search
