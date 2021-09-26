@@ -1,8 +1,15 @@
 # OSG
 # ⌨ >= ⚔
 # Juvenal.ps1
-# Powershell V 7
+# Powershell V 7/5/2
 # This module simplifies searching text files
+
+#                ;~~,__
+# :-....,-------'`-'._.'
+# `-,,,  ,       ,'~~'
+#     ; ,'~.__; /--.
+#     :| :|   :|``(;
+#     `-'`-'  `-'
 
 function birddog {
     [CmdletBinding()]
