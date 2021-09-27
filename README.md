@@ -9,7 +9,7 @@ Birddog is a PowerShell (Version 7/5/2) module for searching raw text and .xlsx 
 
 ## Table of contents
 
-1. [About](https://github.com/JoustingZebra/Project-Birddog/blob/main/README.md/About)
+1. [About](https://github.com/JoustingZebra/Project-Birddog/blob/main/README.md#about)
 2. Installation / Usage
 3. Credits
 4. Disclaimer / Warning
