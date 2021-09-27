@@ -9,7 +9,7 @@ Birddog is a PowerShell (Version 7/5/2) module for searching raw text and .xlsx 
 
 ## Table of contents
 
-1. About
+1. [About]()
 2. Installation / Usage
 3. Credits
 4. Disclaimer / Warning
@@ -118,7 +118,7 @@ Example 4 (seach for Ipv4 addresses in file):
 - URL (Supports most Uniform Resource Locators)
 
 ## Disclaimer / Warning
-All the contents of this repository should be used for authorized and/or educational purposes only. Any misuse of this repository will not be the responsibility of the author or of any other collaborator.
+The contents of this module may allow the execution of the Invoke-Expression cmdlet on an arbitrary user input. Do not permit user access to this module if Invoke-Expression is disabled. Any misuse of this repository will not be the responsibility of the author or of any other collaborator.
 
 ## Credits
 
@@ -128,4 +128,4 @@ Credit to [dfinke](https://github.com/dfinke) for ImportExcel.
 
 ## License
 
-[GPL-3.0 License]()
+[GPL-3.0 License](https://github.com/JoustingZebra/Project-Birddog/blob/main/LICENSE)
