@@ -27,7 +27,7 @@ If so, Birddog is for you!
 
 Birddog simplifies your PowerShell searches of text files. Let's look at an example:
 
-If you want to search a file for a IPv4 address and censor it with the string "Removed for privacy". You basically have to tangle with a monster like this:
+If you want to search a file for a IPv4 address and censor it with the string "Removed for privacy", you basically have to tangle with a monster like this:
 
 ```(Get-Content -Path <path>) -Replace '(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}','Removed for privacy' | Set-Content -Path <path> ```
 
