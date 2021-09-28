@@ -1,6 +1,6 @@
 # OSG
 # ⌨ >= ⚔
-# Juvenal.ps1
+# Birddog.psm1
 # Powershell V 7/5/2
 # This module simplifies searching text files
 
