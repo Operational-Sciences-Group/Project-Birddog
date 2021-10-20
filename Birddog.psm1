@@ -1,7 +1,7 @@
 # OSG
 # ⌨ >= ⚔
 # Birddog.psm1
-# Powershell V 7/5/2
+# PowerShell V 7/5/2
 # This module simplifies searching text files
 
 #                ;~~,__
@@ -10,6 +10,7 @@
 #     ; ,'~.__; /--.
 #     :| :|   :|``(;
 #     `-'`-'  `-'
+
 
 function birddog {
     [CmdletBinding()]
@@ -25,7 +26,7 @@ function birddog {
         [Alias("s")]
         [Parameter(
         HelpMessage="Enter the string you are searching for. (Regex compatible)")]
-        [string]$Searchterm,
+        [string]$SearchTerm,
 
         # print help message switch
         [Alias("h")]
@@ -49,7 +50,12 @@ function birddog {
 
         #Find and replace parameter
         [Parameter(HelpMessage="Term to replace searchterm. does not support .xlsx files.")]
-        [string]$Replace
+        [string]$Replace,
+
+        # Quiet switch
+        [Alias("q")]
+        [Parameter(HelpMessage="Supresses non-text file error messages. Useful in conjunction with the `"-Recurse`" switch. Does not affect seach operation, only what is printed to output.")]
+        [switch]$Quiet
     )
 
     $helptext ="`nNAME
@@ -120,8 +126,9 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
 
     $format = "`nfile:linenumber:line contents"
     $Pipe1 = "Get-ChildItem -ErrorAction Stop $path"
-    $Pipe2 = " | Select-String -AllMatches -Pattern $Searchterm"
-    $Editedfiles = $null
+    $Pipe2 = " | Select-String -AllMatches -Pattern $SearchTerm"
+    $Editedfiles = @()
+    $AllFiles = $null
 
     # if -help
     if ($help){
@@ -138,7 +145,7 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
         Write-host $helptext | Format-Table -AutoSize
     }
 
-    # else the function was called with suficient parameters
+    # else the module was called with suficient parameters
     else {
         $extn = [IO.Path]::GetExtension($path)
 
@@ -149,20 +156,43 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
                 if (-not (Get-Module -Name importexecel)) {
                     Install-Module importexcel -Scope CurrentUser
                 }
-                $search = Import-Excel -Path $path -noheader | Select-String -AllMatches -Pattern $searchterm
+                $search = Import-Excel -Path $path -noheader | Select-String -AllMatches -Pattern $SearchTerm
                 $output =[ordered]@{
                     'SearchTerm' = $null
                     'Row' = $null
                 }
-                $output.SearchTerm = $searchterm
+                $output.SearchTerm = $SearchTerm
                 $output.Row = $Search.LineNumber
                 [pscustomobject]$output
-            
-            # else all other text encoded files
-            } else {
+            }
+            # elseif is not text file, and -Quiet switch is not set 
+            elseif ((Select-String -Path $Path -pattern "�" -SimpleMatch -Quiet) -AND !($Quiet))  {
+                    Write-Host "`n $Path is not a text file.`n"
+                }
+            # else is non-xlsx text file
+            else {
                 #Append Pipe string vars that will be cated and invoked later
                 if ($Recurse){
                     $Pipe1 = $Pipe1 + " -Recurse"
+
+                    #This needs to be a function called "Get-TextFiles"
+                    $AllFiles = Get-ChildItem -path $Path -Recurse
+                    # put text files in EditedFiles
+                    foreach ($file in $AllFiles){
+                        if ((Select-String -Path $file -pattern "�" -SimpleMatch -Quiet) -AND !($Quiet)) {
+                           Write-Host "`n$file is not a text file.`n" 
+                        }
+                        # if file is text, all to  Editedfiles.
+                        if (!(Select-String -Path $file -pattern "�" -SimpleMatch -Quiet)){
+                            $Editedfiles = $Editedfiles += $file
+                        }
+                    }
+                    
+                    # Clear AllFiles
+                    $AllFiles = $null
+                    # Garbage collect
+                    [system.gc]::Collect()
+
                 }
                 #if casesensitive not recursive
                 if($CaseSensitive){
@@ -175,97 +205,98 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
 
                     #Supports group 1-6 cards
                     if($Regex -like "credit card"){
-                        $Searchterm ='(^4[0-9]{12}(?:[0-9]{3})?$)|(^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$)|(3[47][0-9]{13})|(^3(?:0[0-5]|[68][0-9])[0-9]{11}$)|(^6(?:011|5[0-9]{2})[0-9]{12}$)|(^(?:2131|1800|35\d{3})\d{11}$)'
+                        $SearchTerm ='(^4[0-9]{12}(?:[0-9]{3})?$)|(^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$)|(3[47][0-9]{13})|(^3(?:0[0-5]|[68][0-9])[0-9]{11}$)|(^6(?:011|5[0-9]{2})[0-9]{12}$)|(^(?:2131|1800|35\d{3})\d{11}$)'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     #Supports calendar date formats: YYYY-MM-DD (ISO 8601), DD/MM/YYYY , DD-MM-YYYY , DD.MM.YYYY
+                    # Must occur at the start of a new line :(
                     elseif($Regex -like "date"){
-                        $Searchterm ='^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})|^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$|\b^\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$'
+                        $SearchTerm ='^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})|^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$|\b^\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports email
                     elseif($Regex -like "email"){
-                        $Searchterm = '[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+'
+                        $SearchTerm = '[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports IPv4 addresses
                     elseif ($Regex -like "IPv4") {
-                        $Searchterm = '(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}'
+                        $SearchTerm = '(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports IPv6 addresses
                     elseif ($Regex -like "IPv6") {
-                        $Searchterm = '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'
+                        $SearchTerm = '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports Media Access Control addresses
                     elseif ($Regex -like "MAC"){
-                        $Searchterm = '^[a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}$'
+                        $SearchTerm = '^[a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}$'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports passwords that are minimum eight characters, at least one upper case English letter, one lower case English letter, one number and one special character. Or the litteral string "password"
                     elseif($Regex -like "password"){
-                        $Searchterm = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$|\W*((?i)password(?-i))\W*'
+                        $SearchTerm = '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$|\W*((?i)password(?-i))\W*'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports Phone numbers in the following formats: +xxxxxxxxxxx , +xxxxxxxxxxxxx , xxxxxxxxxx , xxx-xxx-xxxx
                     elseif ($Regex -like "phone") {
-                        $Searchterm = '^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$'
+                        $SearchTerm = '^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports IP ports 0-65535
                     elseif ($Regex -like "port") {
-                        $Searchterm = '^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$'
+                        $SearchTerm = '^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports Social Security Numbers xxx-xx-xxxx
                     elseif ($Regex -like "SSN"){
-                        $Searchterm = '^(?!0{3})(?!6{3})[0-8]\d{2}-(?!0{2})\d{2}-(?!0{4})\d{4}$'
+                        $SearchTerm = '^(?!0{3})(?!6{3})[0-8]\d{2}-(?!0{2})\d{2}-(?!0{4})\d{4}$'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     # Supports 12/24 hour time formats: xx:xx am/pm (case insensitive), x:xx am/pm (case insensitive), xx:xx (24hr)
                     elseif ($Regex -like "time") {
-                        $Searchterm = '\b(?:(?:0){0,1}[1-9]|[1-1][0-2]):(?:(?:0){1}[0-9]|[1-4][0-9]|[5-5][0-9])\s*(?:AM|am|PM|pm)\b|\b([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+                        $SearchTerm = '\b(?:(?:0){0,1}[1-9]|[1-1][0-2]):(?:(?:0){1}[0-9]|[1-4][0-9]|[5-5][0-9])\s*(?:AM|am|PM|pm)\b|\b([01]?[0-9]|2[0-3]):[0-5][0-9]$'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     elseif ($Regex -like "URL") {
-                        $Searchterm = 'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)'
+                        $SearchTerm = 'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)'
                         if(!($Replace)){
-                            $Searchterm = ($Searchterm | ForEach-Object{"'" + "$_`'"})
-                            $Pipe2 += $Searchterm
+                            $SearchTerm = ($SearchTerm | ForEach-Object{"'" + "$_`'"})
+                            $Pipe2 += $SearchTerm
                         }
                     }
                     else{
@@ -275,33 +306,34 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
                 }
                 # replace no recursion
                 if($Replace -and !($Recurse)){
-                    $Pipe1 = "(Get-Content -path $path) -replace '$Searchterm','$Replace'"
+                    $Pipe1 = "(Get-Content -path $path) -replace '$SearchTerm','$Replace'"
                     $Pipe2 = " | Set-Content -path $path"
                 }
                 # Recursively find and replace
-                if(($Replace) -and ($Recurse) -and ($Searchterm)){
-                    $EditedFiles = Get-ChildItem -path $Path -Recurse
-                    foreach ($file in $EditedFiles){
+                if(($Replace) -and ($Recurse) -and ($SearchTerm)){
+                    #For each text file
+                    foreach($file in $Editedfiles){
                         # if regex recursive replacement
-                        if($Regex){
+                        elseif($Regex){
                             Write-Host $file
-                            $Pipe1 = "(Get-Content -path $file) -replace '$Searchterm','$Replace'"
+                            $Pipe1 = "(Get-Content -path $file) -replace '$SearchTerm','$Replace'"
                             $Pipe2 = " | Set-Content -path $file"
                             $Search = $Pipe1 + $Pipe2
                             $Search | Invoke-Expression
-                            if(Get-Content -Path $file | Select-String -AllMatches -Pattern `'$Searchterm`'){
+                            if(Get-Content -Path $file | Select-String -AllMatches -Pattern `'$SearchTerm`'){
                                 Write-Host "Replacing `"$Regex`" in `"$file`""
                             }
                         }   #Non-regex recursive replacement
                             else{
-                            $content = [System.IO.File]::ReadAllText($file.FullName).Replace("$Searchterm","$Replace")
+                            $content = [System.IO.File]::ReadAllText($file.FullName).Replace("$SearchTerm","$Replace")
                             [System.IO.File]::WriteAllText($file.FullName, $content)
                             }
                     }
-                    Write-Host "Sucessfully replaced $Searchterm with `"$Replace`" in $path"
+                    Write-Host "Sucessfully replaced $SearchTerm with `"$Replace`" in $path"
+                
                 }
                 # If no recursive find with searchterm and replace 
-                elseif(($Replace) -and (!($Recurse)) -and ($Searchterm) ){
+                elseif(($Replace) -and (!($Recurse)) -and ($SearchTerm) ){
                     $Search = $Pipe1 + $Pipe2
                     $Search | Invoke-Expression
                     # If LineNumber not null (results found)
@@ -309,8 +341,8 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
                         Write-Host $format
                     }
                     # else replaced searchterm in single file
-                    elseif( $Replace -and (Get-Content -path $Path | Select-String $Replace) -and (!(Get-Content -path $Path | Select-String $Searchterm ))){
-                        Write-Host "Successfully replaced `"$Searchterm`" with `"$Replace`" in $path"
+                    elseif( $Replace -and (Get-Content -path $Path | Select-String $Replace) -and (!(Get-Content -path $Path | Select-String $SearchTerm ))){
+                        Write-Host "Successfully replaced `"$SearchTerm`" with `"$Replace`" in $path"
                     }
                     else{
                         Write-Host "`nNo Results Found loser`n"
@@ -320,10 +352,17 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
                 if($Regex -and ($Path)){
                     $Search = $Pipe1 + $Pipe2
                     $Search | Invoke-Expression
+                    if($Search | Invoke-Expression | Select-Object LineNumber){
+                        Write-Host $format
+                    }
                 }
                 else{
                     $Search = $Pipe1 + $Pipe2
                     $Search | Invoke-Expression
+                    Write-Host "`n"
+                    if($Search | Invoke-Expression | Select-Object LineNumber){
+                        Write-Host $format
+                    }
                 }
             }
         }
@@ -333,7 +372,7 @@ https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/abo
         }
         #catch invalid path parameter
         catch [System.Management.Automation.ItemNotFoundException]{
-            Write-Host "`nFile not found."
+            Write-Host "`nFile not found"
             Write-host "Check path parameter and try again"
         }
     }
